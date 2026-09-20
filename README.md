@@ -9,7 +9,10 @@ app. For MacOS, I use [iTerm2](https://iterm2.com/).
 > will be different. You'll just have to open the `.sh` files and figure out how to adapt it to MacOS
 > until I can prepare MacOS commands.
 
-These commands were last tested on May 2022 on Ubuntu 20.
+These commands target Ubuntu 26.04.1 LTS (GNOME desktop). They were originally written for
+Ubuntu 20 back in May 2022 and have since been updated for changes in newer Ubuntu releases:
+Debian/Ubuntu now refuses unmanaged `pip install` calls (PEP 668), the Oh My Zsh installer moved
+to a new URL, and `neofetch` (mentioned below) is no longer packaged.
 
 # Prerequisites
 
@@ -41,6 +44,10 @@ the terminal profile theme.
 ./install_powerline.sh
 ```
 
+> Since Ubuntu 23.04, `pip install` refuses to touch system-managed Python packages unless you pass
+> `--break-system-packages` (this script already does that for you). If you ever run the
+> `powerline-status` install by hand, you'll need to add that flag too.
+
 ### ZSH, OhMyZSH and Plugins
 
 The shell that I use is "ZSH", with the OhMyZSH upgrade on top of that. To install all of that stuff,
@@ -55,7 +62,9 @@ entire theme.
 
 ### Profile (plugins, theme, font and color)
 
-This script will first install two plugins that I like to use: auto-complete and color highlighting.
+This script will first make sure GNOME Terminal and `dconf-cli` are installed (not guaranteed on a
+fresh Ubuntu 26.04.1 desktop), then install two plugins that I like to use: auto-complete and color
+highlighting (it skips the clone if a plugin folder is already there, so it's safe to re-run).
 
 ```bash
 # You don't need to execute this - it's part of the script already.
@@ -87,14 +96,17 @@ How to dump current terminal profiles.
 dconf dump /org/gnome/terminal/legacy/profiles:/ > gnome-terminal-profiles.dconf
 ```
 
-How to display terminal information (I use [Neofetch](https://github.com/dylanaraps/neofetch)).
+How to display terminal information. I used to use [Neofetch](https://github.com/dylanaraps/neofetch),
+but that project is unmaintained and was dropped from Ubuntu's repositories, so this now uses its
+actively-maintained replacement, [fastfetch](https://github.com/fastfetch-cli/fastfetch).
 
 ```bash
-sudo apt-get install neofetch
+sudo apt-get install fastfetch
 
-# Display the profile
-# I override the colors because the default red is kinda ugly in this theme.
-neofetch --ascii_colors 6 7 --colors 2 2 2 2
+# Display the profile.
+# fastfetch's color flags aren't a 1:1 match for neofetch's; run
+# `fastfetch --help color` to see the current options for recoloring the logo.
+fastfetch
 ```
 
 ## How do I reset the changes back to the old terminal?
@@ -109,6 +121,6 @@ For the terminal shell itself, we actually installed a new terminal (zsh) alongs
 
 Here are some of the main resources I used as part of this terminal setup.
 
-[Oh My Zsh!](https://medium.com/wearetheledger/oh-my-zsh-made-for-cli-lovers-installation-guide-3131ca5491fb) | [Robby Russel OMZ](https://github.com/robbyrussell/oh-my-zsh) | [Install Powerline](https://askubuntu.com/questions/283908/how-can-i-install-and-use-powerline-plugin) | [Powerline Patched Fonts](https://github.com/powerline/fonts)
+[Oh My Zsh!](https://medium.com/wearetheledger/oh-my-zsh-made-for-cli-lovers-installation-guide-3131ca5491fb) | [Oh My Zsh (ohmyzsh/ohmyzsh)](https://github.com/ohmyzsh/ohmyzsh) | [Install Powerline](https://askubuntu.com/questions/283908/how-can-i-install-and-use-powerline-plugin) | [Powerline Patched Fonts](https://github.com/powerline/fonts)
 | [Agnoster Theme](https://gist.github.com/3712874)
 
