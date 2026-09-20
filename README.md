@@ -12,7 +12,9 @@ app. For MacOS, I use [iTerm2](https://iterm2.com/).
 These commands target Ubuntu 26.04.1 LTS (GNOME desktop). They were originally written for
 Ubuntu 20 back in May 2022 and have since been updated for changes in newer Ubuntu releases:
 Debian/Ubuntu now refuses unmanaged `pip install` calls (PEP 668), the Oh My Zsh installer moved
-to a new URL, and `neofetch` (mentioned below) is no longer packaged.
+to a new URL, `neofetch` (mentioned below) is no longer packaged, and Ubuntu 26.04.1 ships
+[Ptyxis](https://gitlab.gnome.org/chergert/ptyxis) as the default terminal app instead of GNOME
+Terminal (both are supported — see "Profile" below).
 
 # Prerequisites
 
@@ -62,21 +64,10 @@ entire theme.
 
 ### Profile (plugins, theme, font and color)
 
-This script will first make sure GNOME Terminal and `dconf-cli` are installed (not guaranteed on a
-fresh Ubuntu 26.04.1 desktop), then install two plugins that I like to use: auto-complete and color
-highlighting (it skips the clone if a plugin folder is already there, so it's safe to re-run).
-
-```bash
-# You don't need to execute this - it's part of the script already.
-(cd ~/.oh-my-zsh/custom/plugins && git clone https://github.com/zsh-users/zsh-syntax-highlighting)
-(cd ~/.oh-my-zsh/custom/plugins && git clone https://github.com/zsh-users/zsh-autosuggestions)
-```
-
-It will also copy over the `.zshrc` and `pixegami-agnoster.zsh-theme` files for the
-terminal to use (which will wire up the plugins and the theme).
-
-The last command is to create a terminal profile that will set the colors and also set the font
-to be the Powerline one we installed earlier (required for the theme to display correctly).
+This script installs two zsh plugins (auto-complete and color highlighting; it skips the clone if a
+plugin folder is already there, so it's safe to re-run), copies over `.zshrc` and the
+`pixegami-agnoster.zsh-theme` file, sets up the "Pixegami" color scheme for whichever terminal app
+you have (see below), and switches your default shell to zsh.
 
 ```bash
 ./install_profile.sh
@@ -84,21 +75,24 @@ to be the Powerline one we installed earlier (required for the theme to display 
 
 > You can also change the font to any of the other [Powerline Patched Fonts](https://github.com/powerline/fonts) too if you don't like RobotoMono.
 
-If it looks funky after this command, then you might need to wait until the theme is updated with a
-Powerline font (the next step), and may need to also restart your machine.
+**Terminal app:** Ubuntu 26.04.1 ships [Ptyxis](https://gitlab.gnome.org/chergert/ptyxis) as the
+default terminal, not GNOME Terminal (even if the `gnome-terminal` package happens to be installed
+too). The script detects whichever one is present (`command -v ptyxis` / `command -v gnome-terminal`)
+and configures its colors accordingly — Ptyxis via `ptyxis --import-palette` on
+`configs/Pixegami.palette` plus `gsettings`, GNOME Terminal via `dconf` on
+`configs/terminal_profile.dconf`. Ptyxis picks up the new palette live; GNOME Terminal only applies
+its new default profile to windows opened after the script runs, so close and reopen the terminal if
+you were using one.
 
 > **Important:** run all three scripts as yourself, never with `sudo ./install_*.sh` in front. Each
 > script already calls `sudo` internally wherever it actually needs root (the `apt-get` installs) and
 > will prompt for your password at that point — that's expected. Running the whole script as root
-> instead makes `~`/`$HOME` resolve to `/root`, so Oh My Zsh, the plugins, `.zshrc` and this terminal
-> profile all get installed for the `root` account instead of you, and `install_profile.sh`'s `dconf`
-> step will fail outright with `Failed to execute child process "dbus-launch"` (root has no graphical
-> D-Bus session to talk to). The scripts refuse to run as root for this reason. Also make sure you run
-> `install_profile.sh` from a terminal opened inside your actual GNOME desktop session (not over SSH or
-> from a bare TTY), since `dconf` needs that session's D-Bus bus.
->
-> After `install_profile.sh` finishes, close every open terminal window and open a brand-new one — an
-> already-open window keeps whatever profile it started with.
+> instead makes `~`/`$HOME` resolve to `/root`, so Oh My Zsh, the plugins, `.zshrc` and the terminal
+> profile all get installed for the `root` account instead of you, and `install_profile.sh`'s
+> dconf/gsettings calls fail outright with `Failed to execute child process "dbus-launch"` (root has no
+> graphical D-Bus session to talk to). The scripts refuse to run as root for this reason. Also make
+> sure you run `install_profile.sh` from a terminal opened inside your actual GNOME desktop session
+> (not over SSH or from a bare TTY), since it needs that session's D-Bus bus.
 
 ## Notes
 
@@ -110,14 +104,15 @@ dconf dump /org/gnome/terminal/legacy/profiles:/ > gnome-terminal-profiles.dconf
 
 How to display terminal information. I used to use [Neofetch](https://github.com/dylanaraps/neofetch),
 but that project is unmaintained and was dropped from Ubuntu's repositories, so this now uses its
-actively-maintained replacement, [fastfetch](https://github.com/fastfetch-cli/fastfetch).
+actively-maintained replacement, [fastfetch](https://github.com/fastfetch-cli/fastfetch), with
+`configs/fastfetch-config.jsonc` giving it the same Pixegami color scheme (aqua/hacker-green logo,
+matching label/title colors) instead of fastfetch's default colors.
 
 ```bash
 sudo apt-get install fastfetch
+mkdir -p ~/.config/fastfetch
+cp configs/fastfetch-config.jsonc ~/.config/fastfetch/config.jsonc
 
-# Display the profile.
-# fastfetch's color flags aren't a 1:1 match for neofetch's; run
-# `fastfetch --help color` to see the current options for recoloring the logo.
 fastfetch
 ```
 
