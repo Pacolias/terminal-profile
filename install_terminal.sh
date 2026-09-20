@@ -3,6 +3,15 @@
 # Fail on any command.
 set -euo pipefail
 
+# Run as yourself, not via sudo/root: this installs Oh My Zsh into `~`, which
+# must be your real home directory, not /root. The apt-get call below already
+# uses sudo internally and will prompt for your password when it needs it.
+if [ "$(id -u)" -eq 0 ]; then
+	echo "error: do not run this script with sudo/as root." >&2
+	echo "       run it as yourself, e.g.: ./install_terminal.sh" >&2
+	exit 1
+fi
+
 # Install ZSH
 sudo apt-get update
 sudo apt-get install -y git zsh curl

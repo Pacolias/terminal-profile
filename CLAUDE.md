@@ -27,7 +27,11 @@ copies every patched font under `fonts/`) instead of duplicating the copy/`fc-ca
 All three top-level scripts use `#!/usr/bin/env bash` + `set -euo pipefail`, so they print every
 command before running it and abort on the first failure. None of them use `sudo` to write into the
 invoking user's `$HOME` (that would leave root-owned dotfiles behind) — `sudo` is reserved for
-`apt-get` and `chsh`.
+`apt-get` and `chsh`. Each script also refuses to run as root/`sudo` itself (`id -u -eq 0` guard) since
+that would resolve `~`/`$HOME` to `/root` instead of the real user, and `install_profile.sh` additionally
+requires a real D-Bus session (`DBUS_SESSION_BUS_ADDRESS`/`XDG_RUNTIME_DIR`) since its `dconf`
+calls need the GNOME desktop session's bus — running it as root or over SSH fails with
+`Failed to execute child process "dbus-launch"`.
 
 ## Ubuntu-version-sensitive details
 

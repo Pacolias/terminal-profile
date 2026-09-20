@@ -87,6 +87,18 @@ to be the Powerline one we installed earlier (required for the theme to display 
 If it looks funky after this command, then you might need to wait until the theme is updated with a
 Powerline font (the next step), and may need to also restart your machine.
 
+> **Important:** run all three scripts as yourself, never with `sudo ./install_*.sh` in front. Each
+> script already calls `sudo` internally wherever it actually needs root (the `apt-get` installs) and
+> will prompt for your password at that point — that's expected. Running the whole script as root
+> instead makes `~`/`$HOME` resolve to `/root`, so Oh My Zsh, the plugins, `.zshrc` and this terminal
+> profile all get installed for the `root` account instead of you, and `install_profile.sh`'s `dconf`
+> step will fail outright with `Failed to execute child process "dbus-launch"` (root has no graphical
+> D-Bus session to talk to). The scripts refuse to run as root for this reason. Also make sure you run
+> `install_profile.sh` from a terminal opened inside your actual GNOME desktop session (not over SSH or
+> from a bare TTY), since `dconf` needs that session's D-Bus bus.
+>
+> After `install_profile.sh` finishes, close every open terminal window and open a brand-new one — an
+> already-open window keeps whatever profile it started with.
 
 ## Notes
 

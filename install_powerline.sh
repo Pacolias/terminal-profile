@@ -3,6 +3,15 @@
 # Fail on any command.
 set -euo pipefail
 
+# Run as yourself, not via sudo/root: `~` below must resolve to your real
+# home directory. The apt-get/pip calls already use sudo internally where
+# needed and will prompt for your password when they do.
+if [ "$(id -u)" -eq 0 ]; then
+	echo "error: do not run this script with sudo/as root." >&2
+	echo "       run it as yourself, e.g.: ./install_powerline.sh" >&2
+	exit 1
+fi
+
 # Install Powerline for VIM.
 sudo apt-get update
 sudo apt-get install -y python3-pip fonts-powerline
